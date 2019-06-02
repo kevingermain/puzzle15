@@ -4,13 +4,11 @@
                       class="puzzle"
                       tag="div">
       <template v-for="(row, y) in puzzle">
-        <div v-for="(cell, x) in row"
+        <tile v-for="(cell, x) in row"
              :key="cell+0"
-             @click="move(y, x)"
-             :class="[{'empty-tile': cell === null}, {'green-tile': x+y*3+1 == cell}]"
-             class="tile">
-          {{cell}}
-        </div>
+             :number="cell"
+             :placed="x+y*3+1 == cell"
+             @click.native="move(y, x)" />
       </template>
     </transition-group>
     <div class="finished" v-if="finished">
@@ -21,8 +19,13 @@
 </template>
 
 <script>
+import tile from './tile';
+
 export default {
   name: "Puzzle15",
+  components: {
+    tile,
+  },
   props: {
     msg: String
   },
@@ -42,13 +45,13 @@ export default {
         for (let j = 0; j < this.puzzle[i].length; j++) {
           if(this.puzzle[i][j] !== j+i*3+1 && this.puzzle[i][j] !== null)
             return false;
-        } 
+        }
       }
       return true;
     },
     newGame() {
       for (let i = 0; i < 50; i++) {
-        this.randomStart();
+        this.shuffle();
       }
       this.finished = false;
     },
@@ -59,7 +62,6 @@ export default {
       this.$forceUpdate();
     },
     swap(x, y) {
-      // console.log('swap');
       // right side
       if (x + 1 < 3 && this.puzzle[x + 1][y] === null) {
         this.updateTile(x, y, x+1, y);
@@ -69,7 +71,6 @@ export default {
         // left side
       } else if (x - 1 >= 0 && this.puzzle[x - 1][y] === null) {
         this.updateTile(x, y, x-1, y);
-
         // top side
       } else if (y + 1 < 3 && this.puzzle[x][y + 1] === null) {
         this.updateTile(x, y, x, y+1);
@@ -84,7 +85,7 @@ export default {
       row2[y] = null;
       this.$set(this.puzzle, this.puzzle[x], row2);
     },
-    randomStart() {
+    shuffle() {
       const possibleSwaps = this.possibleSwap(...this.empty);
       const tileToSwap = this.randomTile(possibleSwaps);
       this.move(...tileToSwap);
@@ -116,6 +117,7 @@ export default {
 $margin-size: 10px;
 $number_of_tiles: 3;
 $tile-size: 100 / $number_of_tiles + "%";
+
 .container {
   position: relative;
   width: 50vw;
