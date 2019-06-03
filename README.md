@@ -1,29 +1,31 @@
-# puzzle15
+# Puzzle 15
 
-## Project setup
-```
-yarn install
-```
+# Challenge for a company (Puzzle 15)
 
-### Compiles and hot-reloads for development
-```
-yarn run serve
-```
+![puzzle-15](./src/assets/puzzle15.gif)
 
-### Compiles and minifies for production
-```
-yarn run build
-```
+> Live version at: [https://kevingermain.github.io/puzzle15](https://kevingermain.github.io/puzzle15)
 
-### Run your tests
-```
-yarn run test
-```
+----
 
-### Lints and fixes files
-```
-yarn run lint
-```
+[A puzzle 15](https://en.wikipedia.org/wiki/15_puzzle) is a sliding puzzle that consists of a frame of numbered square tiles in random order with one tile missing.
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+----
+
+## Setup
+
+`git clone https://kevingermain.github.io/puzzle15 && cd puzzle15`
+
+`npm i && npm run serve`
+
+## Build
+
+`npm run build`
+
+----
+
+## Improvements
+
+- [ ] Custom size of the grid
+- [ ] Add tests
+- [ ] Use keyboard arrows

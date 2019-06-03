@@ -1,16 +1,16 @@
 <template>
-  <div class="container">
+  <div class="container" :style="`padding-top: ${marginSize}; padding-left: ${marginSize};`">
     <transition-group name="list"
                       class="puzzle"
                       tag="div">
       <template v-for="(row, y) in puzzle">
-        <div v-for="(cell, x) in row"
+        <tile v-for="(cell, x) in row"
              :key="cell+0"
-             @click="move(y, x)"
-             :class="[{'empty-tile': cell === null}, {'green-tile': x+y*3+1 == cell}]"
-             class="tile">
-          {{cell}}
-        </div>
+             :number="cell"
+             :marginSize="marginSize"
+             :tileSize="100 / size + '%'"
+             :placed="x+y*puzzle.length+1 == cell"
+             @click.native="move(y, x)" />
       </template>
     </transition-group>
     <div class="finished" v-if="finished">
@@ -21,34 +21,65 @@
 </template>
 
 <script>
+import tile from './tile';
+
 export default {
   name: "Puzzle15",
+  components: {
+    tile,
+  },
   props: {
-    msg: String
+    size: {
+      type: Number,
+      required: false,
+      default: 10,
+    },    
+    marginSize: {
+      type: String,
+      required: false,
+      default: '10px',
+    },
   },
   data() {
     return {
-      puzzle: [[1, 2, 3], [4, 5, 6], [7, 8, null]],
-      empty: [2, 2],
+      puzzle: [],
+      empty: [this.size-1, this.size-1],
       finished: false,
     };
+  },
+  created() {
+    this.buildPuzzle();
   },
   mounted() {
     this.newGame();
   },
   methods: {
+    buildPuzzle() {
+      this.puzzle = [];
+      this.empty = [this.size-1, this.size-1];
+      for (let i = 0; i < this.size; i++) {
+        this.puzzle.push([]);
+        for (let j = 0; j < this.size; j++) {
+          if(j === this.size-1 && i === this.size-1)
+            this.puzzle[i].push(null);
+          else 
+            this.puzzle[i].push(j+i*this.size+1);
+        }
+      }
+      this.$forceUpdate();
+    },
     isResolved() {
-      for (let i = 0; i < this.puzzle.length; i++) {
-        for (let j = 0; j < this.puzzle[i].length; j++) {
-          if(this.puzzle[i][j] !== j+i*3+1 && this.puzzle[i][j] !== null)
+      for (let i = 0; i < this.size; i++) {
+        for (let j = 0; j < this.size; j++) {
+          if(this.puzzle[i][j] !== j+i*this.size+1 && this.puzzle[i][j] !== null)
             return false;
-        } 
+        }
       }
       return true;
     },
     newGame() {
-      for (let i = 0; i < 50; i++) {
-        this.randomStart();
+      for (let i = 0; i < 50*this.size; i++) {
+        this.shuffle();
       }
       this.finished = false;
     },
@@ -59,9 +90,8 @@ export default {
       this.$forceUpdate();
     },
     swap(x, y) {
-      // console.log('swap');
       // right side
-      if (x + 1 < 3 && this.puzzle[x + 1][y] === null) {
+      if (x + 1 < this.size && this.puzzle[x + 1][y] === null) {
         this.updateTile(x, y, x+1, y);
         // bottom side
       } else if (y - 1 >= 0 && this.puzzle[x][y - 1] === null) {
@@ -69,9 +99,8 @@ export default {
         // left side
       } else if (x - 1 >= 0 && this.puzzle[x - 1][y] === null) {
         this.updateTile(x, y, x-1, y);
-
         // top side
-      } else if (y + 1 < 3 && this.puzzle[x][y + 1] === null) {
+      } else if (y + 1 < this.size && this.puzzle[x][y + 1] === null) {
         this.updateTile(x, y, x, y+1);
       }
     },
@@ -84,7 +113,7 @@ export default {
       row2[y] = null;
       this.$set(this.puzzle, this.puzzle[x], row2);
     },
-    randomStart() {
+    shuffle() {
       const possibleSwaps = this.possibleSwap(...this.empty);
       const tileToSwap = this.randomTile(possibleSwaps);
       this.move(...tileToSwap);
@@ -92,7 +121,7 @@ export default {
     },
     possibleSwap(x, y) {
       const possibleSwaps = [];
-      if (x + 1 < 3) {
+      if (x + 1 < this.size) {
         possibleSwaps.push([x + 1, y]);
       }
       if (y - 1 >= 0) {
@@ -101,13 +130,19 @@ export default {
       if (x - 1 >= 0) {
         possibleSwaps.push([x - 1, y]);
       }
-      if (y + 1 < 3) {
+      if (y + 1 < this.size) {
         possibleSwaps.push([x, y + 1]);
       }
       return possibleSwaps;
     },
     randomTile(tiles) {
       return tiles[Math.floor(Math.random() * tiles.length)];
+    }
+  },
+  watch: {
+    size() {
+      this.buildPuzzle();
+      this.newGame();
     }
   }
 };
@@ -116,6 +151,7 @@ export default {
 $margin-size: 10px;
 $number_of_tiles: 3;
 $tile-size: 100 / $number_of_tiles + "%";
+
 .container {
   position: relative;
   width: 50vw;
@@ -125,8 +161,6 @@ $tile-size: 100 / $number_of_tiles + "%";
   background-color: #ffffffb0;
   border: 15px solid #ff4900d1;
   border-radius: 15px;
-  padding-top: $margin-size;
-  padding-left: $margin-size;
   margin: 0 auto;
 }
 
@@ -137,15 +171,11 @@ $tile-size: 100 / $number_of_tiles + "%";
   display: inline-flex;
 }
 .tile {
-  width: calc(#{$tile-size} - #{$margin-size});
-  height: calc(#{$tile-size} - #{$margin-size});
+  flex-grow: 0;
   background-color: #bec7be;
   cursor: pointer;
   text-align: center;
   vertical-align: middle;
-  margin-right: $margin-size;
-  margin-bottom: $margin-size;
-  font-size: 6vw;
   display: flex;
   align-items: center;
   justify-content: center;
