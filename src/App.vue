@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <h1>Puzzle 15</h1>
-    <puzzle15 :size="selectedSize" :marginSize="'5px'" />
+    <puzzle15 :size="selectedSize" marginSize="5px" />
 
     <div class="select">
       <select name="slct" id="slct" v-model.number="selectedSize">
