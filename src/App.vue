@@ -1,7 +1,19 @@
 <template>
   <div id="app">
     <h1>Puzzle 15</h1>
-    <puzzle15 />
+    <puzzle15 :size="selectedSize" :marginSize="'5px'" />
+
+    <div class="select">
+      <select name="slct" id="slct" v-model.number="selectedSize">
+        <option selected disabled>Size of the puzzle</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+      </select>
+    </div>
   </div>
 </template>
 
@@ -12,6 +24,11 @@ export default {
   name: 'app',
   components: {
     puzzle15,
+  },
+  data() {
+    return {
+      selectedSize: 3,
+    }
   }
 }
 </script>
@@ -36,6 +53,59 @@ body {
 
   h1 {
     font-size: 4rem;
+  }
+
+  select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    appearance: none;
+    outline: 0;
+    box-shadow: none;
+    border: 0 !important;
+    background: #2c3e50;
+    background-image: none;
+    font-size: 2em;
+  }
+  /* Remove IE arrow */
+  select::-ms-expand {
+    display: none;
+  }
+  /* Custom Select */
+  .select {
+    position: relative;
+    display: flex;
+    width: 20em;
+    height: 3em;
+    line-height: 3;
+    background: #2c3e50;
+    overflow: hidden;
+    border-radius: .25em;
+    margin: 20px auto 0;
+  }
+  select {
+    flex: 1;
+    padding: 0 .5em;
+    color: #fff;
+    cursor: pointer;
+  }
+  /* Arrow */
+  .select::after {
+    content: '\25BC';
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0 1em;
+    background: #34495e;
+    cursor: pointer;
+    pointer-events: none;
+    -webkit-transition: .25s all ease;
+    -o-transition: .25s all ease;
+    transition: .25s all ease;
+  }
+  /* Transition */
+  .select:hover::after {
+    color: #f39c12;
   }
 }
 
